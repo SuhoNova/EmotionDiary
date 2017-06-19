@@ -21,7 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CognitiveEmotion.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)Model\EvaluationModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\EmotionModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)MainPage.xaml">
