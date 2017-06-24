@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<TabbedPage 
+<TabbedPage Title="Emotion Diary!"
     xmlns="http://xamarin.com/schemas/2014/forms" 
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
     xmlns:local="clr-namespace:EmotionDiary"
     x:Class="EmotionDiary.MainPage">
-    <NavigationPage Title="Take Photo!">
+    <NavigationPage Title="Take Selfie!">
         <x:Arguments>
             <local:CognitiveEmotion />
         </x:Arguments>
     </NavigationPage>
-    <NavigationPage Title="View History">
+    <NavigationPage Title="View Emotion History">
         <x:Arguments>
             <local:AzureTable />
         </x:Arguments>

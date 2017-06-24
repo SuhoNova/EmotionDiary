@@ -8,13 +8,14 @@ using EmotionDiary.Model;
 using Newtonsoft.Json;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
+using Plugin.Geolocator;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
+using Xamarin.Forms.Maps;
 
 
 namespace EmotionDiary
 {
-	public partial class CognitiveEmotion : ContentPage
+    public partial class CognitiveEmotion : ContentPage
 	{
 		public CognitiveEmotion ()
 		{
@@ -33,8 +34,16 @@ namespace EmotionDiary
 	            return;
 	        }
 
+            // Check if gps is on 
+	        var locator = CrossGeolocator.Current;
+	        if (!locator.IsGeolocationEnabled)
+	        {
+	            await DisplayAlert("No Location", "GPS is needed for this to work", "OK");
+	            return;
+	        }
+
             // Take a photo
-	        MediaFile file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+            MediaFile file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
 	        {
 	            PhotoSize = PhotoSize.Medium,
 	            Directory = "Sample",
@@ -50,12 +59,41 @@ namespace EmotionDiary
 	            return file.GetStream();
 	        });
 
-            EmotionLabel.Text = "";
+            EmotionLabel.Text = "Analyzing selfie...";
 
             await EvaluateEmotionRequest(file);
 	    }
 
-	    static byte[] GetImageAsByteArray(MediaFile file)
+        async Task PostEmotionLocationAsync(string emotionResult, double emotionScore)
+        {
+            var locator = CrossGeolocator.Current;
+            locator.DesiredAccuracy = 50;
+
+            var position = await locator.GetPositionAsync(10000);
+
+            EmotionDiaryModel model = new EmotionDiaryModel()
+            {
+                EmotionResult = emotionResult,
+                EmotionScore = emotionScore,
+                Longitude = (float)position.Longitude,
+                Latitude = (float)position.Latitude,
+                Date = DateTime.UtcNow
+            };
+
+            //Geocoder geoCoder = new Geocoder();
+
+            //var positionForGeocoder = new Position(position.Latitude, position.Longitude);
+            //var possibleAddresses = await geoCoder.GetAddressesForPositionAsync(positionForGeocoder);
+            //var address = "";
+            //foreach (var tempAddress in possibleAddresses)
+            //    address = tempAddress;
+
+            EmotionLabel.Text = "You feel " + emotionResult + " with a score of " + emotionScore ; //address;
+
+            await AzureManager.AzureManagerInstance.PostHotDogInformation(model);
+        }
+
+        static byte[] GetImageAsByteArray(MediaFile file)
 	    {
 	        var stream = file.GetStream();
 	        BinaryReader binaryReader = new BinaryReader(stream);
@@ -84,23 +122,24 @@ namespace EmotionDiary
 	            if (response.IsSuccessStatusCode)
 	            {
 	                var responseString = await response.Content.ReadAsStringAsync();
+                    var emotions = JsonConvert.DeserializeObject<RootObject[]>(responseString);
 
-                    var emotions = JsonConvert.DeserializeObject<RootObject>(responseString);
+	                double emotionScore = emotions[0].scores.Values.Max(m => m);
+                    // Comparing float numbers using ==  is bad due to possible precision loss
+                    var emotionResult = emotions[0].scores.FirstOrDefault(s => Math.Abs(s.Value - emotionScore) < 0.001).Key;
+                    //EmotionLabel.Text = "You feel " + emotionResult + "";
 
-                    //double max = responseModel.Predictions.Max(m => m.Probability);
-	                var scores = emotions.scores;
-	                var highestScore = scores.Values.Max(s => s);
-	                var highestEmotion = scores.FirstOrDefault(s => s.Value == highestScore).Key;
-
-                    //TagLabel.Text = (max >= 0.5) ? "Hotdog" : "Not hotdog";
-	                EmotionLabel.Text = "You feel " + highestEmotion;
-
+                    await PostEmotionLocationAsync(emotionResult, emotionScore);
+                }
+	            else
+	            {
+	                await DisplayAlert("Failed", "Couldn't reach the API! Wait or complain to the developer.", "OK");
                 }
 
-	            //Get rid of file once we have finished using it
-	            file.Dispose();
 	        }
-	    }
+	        //Get rid of file once we have finished using it
+            file.Dispose();
+        }
 
 
     }
