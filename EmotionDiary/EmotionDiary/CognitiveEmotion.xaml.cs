@@ -10,13 +10,14 @@ using Plugin.Media;
 using Plugin.Media.Abstractions;
 using Plugin.Geolocator;
 using Xamarin.Forms;
-using Xamarin.Forms.Maps;
-
+using Xamarin.Forms.Xaml;
 
 namespace EmotionDiary
 {
+    [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class CognitiveEmotion : ContentPage
-	{
+    {
+
 		public CognitiveEmotion ()
 		{
 			InitializeComponent ();
@@ -80,15 +81,7 @@ namespace EmotionDiary
                 Date = DateTime.UtcNow
             };
 
-            //Geocoder geoCoder = new Geocoder();
-
-            //var positionForGeocoder = new Position(position.Latitude, position.Longitude);
-            //var possibleAddresses = await geoCoder.GetAddressesForPositionAsync(positionForGeocoder);
-            //var address = "";
-            //foreach (var tempAddress in possibleAddresses)
-            //    address = tempAddress;
-
-            EmotionLabel.Text = "You feel " + emotionResult + " with a score of " + emotionScore ; //address;
+            EmotionLabel.Text = "You feel " + emotionResult + " with a score of " + emotionScore;
 
             await AzureManager.AzureManagerInstance.PostHotDogInformation(model);
         }
@@ -127,7 +120,6 @@ namespace EmotionDiary
 	                double emotionScore = emotions[0].scores.Values.Max(m => m);
                     // Comparing float numbers using ==  is bad due to possible precision loss
                     var emotionResult = emotions[0].scores.FirstOrDefault(s => Math.Abs(s.Value - emotionScore) < 0.001).Key;
-                    //EmotionLabel.Text = "You feel " + emotionResult + "";
 
                     await PostEmotionLocationAsync(emotionResult, emotionScore);
                 }
@@ -140,7 +132,6 @@ namespace EmotionDiary
 	        //Get rid of file once we have finished using it
             file.Dispose();
         }
-
 
     }
 }

@@ -1,13 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="EmotionDiary.CognitiveEmotion">
+             x:Class="EmotionDiary.CognitiveEmotion"
+             Title="Emotion Diary!">
+    <ContentPage.Padding>
+        <OnPlatform x:TypeArguments="Thickness" iOS="0, 20, 0, 0" />
+    </ContentPage.Padding>
     <StackLayout Margin="20" Orientation="Vertical">
-        <Button Text="Take Selfie!" Clicked="loadCamera" />
+        <Button Text="Take Selfie!" Clicked="loadCamera" BackgroundColor="#6cc0e5" />
+        <Label x:Name="EmotionLabel" FontSize="18" HorizontalTextAlignment="Center">
+        </Label>
         <Image x:Name="image" />
-        <StackLayout Orientation="Vertical">
-            <Label x:Name="EmotionLabel">
-            </Label>
-        </StackLayout>
     </StackLayout>
 </ContentPage>

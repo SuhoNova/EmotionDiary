@@ -15,25 +15,14 @@ namespace EmotionDiary
 	public partial class AzureTable : ContentPage
 	{
 	    MobileServiceClient client = AzureManager.AzureManagerInstance.AzureClient;
-	    Geocoder _geoCoder;
 
         public AzureTable ()
 		{
 			InitializeComponent ();
-            _geoCoder = new Geocoder();
         }
 	    async void Handle_ClickedAsync(object sender, System.EventArgs e)
 	    {
 	        List<EmotionDiaryModel> emotionDiaryHistory = await AzureManager.AzureManagerInstance.GetEmotionHistory();
-
-	        //foreach (EmotionDiaryModel model in emotionDiaryHistory)
-	        //{
-	        //    var position = new Position(model.Latitude, model.Longitude);
-	        //    var possibleAddresses = await _geoCoder.GetAddressesForPositionAsync(position);
-	        //    foreach (var address in possibleAddresses)
-	        //    model.City = address;
-	        //}
-
             EmotionHistoryList.ItemsSource = emotionDiaryHistory;
 	    }
     }
